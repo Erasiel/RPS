@@ -1,9 +1,10 @@
-from PyQt5 import QtGui, QtCore, QtWidgets
+from PyQt5 import QtGui, QtWidgets
 import cv2
 import sys
 import numpy as np
-from PyQt5.QtCore import pyqtSignal, pyqtSlot, Qt, QThread
+from PyQt5.QtCore import pyqtSignal, Qt, QThread
 from DataCollector import DataCollector
+
 
 class VideoThread(QThread):
     change_pixmap_signal = pyqtSignal(np.ndarray)
@@ -26,6 +27,7 @@ class VideoThread(QThread):
             if ret:
                 mid_image = self.grab_mid(cv_img, 256, 256)
                 self.change_pixmap_signal.emit(mid_image)
+
 
 class DataCollectionWidget(QtWidgets.QWidget):
     def __init__(self, parent=None):
@@ -67,7 +69,7 @@ class DataCollectionWidget(QtWidgets.QWidget):
         self.setWindowTitle("Data collection")
 
         # Image content related variables
-        self.disply_width = 256
+        self.display_width = 256
         self.display_height = 256
         self.cv_img = None
 
@@ -96,7 +98,7 @@ class DataCollectionWidget(QtWidgets.QWidget):
                                             bytes_per_line,
                                             QtGui.QImage.Format_RGB888)
 
-        p = convert_to_Qt_format.scaled(self.disply_width,
+        p = convert_to_Qt_format.scaled(self.display_width,
                                         self.display_height,
                                         Qt.KeepAspectRatio)
 
@@ -115,11 +117,12 @@ class DataCollectionWidget(QtWidgets.QWidget):
                                             bytes_per_line,
                                             QtGui.QImage.Format_Grayscale8)
 
-        p = convert_to_Qt_format.scaled(self.disply_width,
+        p = convert_to_Qt_format.scaled(self.display_width,
                                         self.display_height,
                                         Qt.KeepAspectRatio)
 
         return QtGui.QPixmap.fromImage(p)
+
 
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)

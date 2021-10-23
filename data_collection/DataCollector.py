@@ -3,12 +3,14 @@ import cv2
 import time
 import calendar
 
+
 def create_directory(dir_path):
     if not os.path.isdir(dir_path):
         os.mkdir(dir_path)
 
+
 class DataCollector:
-    def __init__(self, base_path = "."):
+    def __init__(self, base_path="."):
         data_dir = os.path.join(base_path, "data")
         train_dir = os.path.join(data_dir, "train")
         rock_dir = os.path.join(train_dir, "rock")
