@@ -127,3 +127,9 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Train data folder
+**/data
+
+# Test jupyter notebooks
+**/*.ipynb

@@ -44,6 +44,18 @@ class DataCollectionWidget(QtWidgets.QWidget):
         self.thread = VideoThread()
         self.thread.change_pixmap_signal.connect(self.update_image)
 
+        # Setup train-validation checkboxes
+        self.train_cb = QtWidgets.QCheckBox("Train", self)
+        self.validation_cb = QtWidgets.QCheckBox("Validation", self)
+        self.train_cb.stateChanged.connect(self.update_check)
+        self.validation_cb.stateChanged.connect(self.update_check)
+        self.train_cb.setChecked(True)
+        self.target_folder = "train"
+
+        checkbox_layout = QtWidgets.QHBoxLayout()
+        checkbox_layout.addWidget(self.train_cb)
+        checkbox_layout.addWidget(self.validation_cb)
+
         # Setup buttons
         rock_button = QtWidgets.QPushButton('ROCK')
         paper_button = QtWidgets.QPushButton('PAPER')
@@ -63,6 +75,7 @@ class DataCollectionWidget(QtWidgets.QWidget):
 
         # Setup layout
         self.layout = QtWidgets.QVBoxLayout()
+        self.layout.addLayout(checkbox_layout)
         self.layout.addLayout(button_layout)
         self.layout.addWidget(self.image_label)
         self.setLayout(self.layout)
@@ -76,14 +89,22 @@ class DataCollectionWidget(QtWidgets.QWidget):
         # Start image capture
         self.thread.start()
 
+    def update_check(self, state):
+        if state == Qt.Checked:
+            if (self.sender() == self.train_cb):
+                self.target_folder = "train"
+                self.validation_cb.setChecked(False)
+            else:
+                self.target_folder = "validation"
+                self.train_cb.setChecked(False)
+
     def save_image(self, label):
-        # TODO: save self.cv_img with the given label
-        self.data_collector.save_image(self.cv_img, label)
+        self.data_collector.save_image(self.cv_img, label, self.target_folder)
 
     def update_image(self, cv_img):
         self.cv_img = cv_img
-        # qt_img = self.convert_cv_qt_color(cv_img)
-        qt_img = self.convert_cv_qt_gray(cv_img)
+        qt_img = self.convert_cv_qt_color(cv_img)
+        # qt_img = self.convert_cv_qt_gray(cv_img)
         self.image_label.setPixmap(qt_img)
 
     def convert_cv_qt_color(self, cv_img):
