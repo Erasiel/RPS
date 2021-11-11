@@ -13,7 +13,7 @@ class DataCollector:
     def __init__(self, base_path="."):
         # Base directory for all data
         data_dir = os.path.join(base_path, "data")
-        
+
         # Train and validation data go in separate directories
         train_dir = os.path.join(data_dir, "train")
         val_dir = os.path.join(data_dir, "validation")
@@ -23,7 +23,7 @@ class DataCollector:
         train_paper_dir = os.path.join(train_dir, "paper")
         train_scissors_dir = os.path.join(train_dir, "scissors")
         train_none_dir = os.path.join(train_dir, "none")
-        
+
         # Validation data directories
         val_rock_dir = os.path.join(val_dir, "rock")
         val_paper_dir = os.path.join(val_dir, "paper")
@@ -49,13 +49,13 @@ class DataCollector:
         label = label.lower()
         gmt = time.gmtime()
         timestamp = calendar.timegm(gmt)
-        
+
         filename = f"{label}{timestamp}.jpg"
 
         if target_folder == "train":
             filepath = os.path.join(self.train_dir, label, filename)
         else:
             filepath = os.path.join(self.validation_dir, label, filename)
-        
+
         cv2.imwrite(filepath, image)
         print(f"Succesfully saved {filepath}")
