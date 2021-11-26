@@ -27,7 +27,8 @@ class MainWindow(QMainWindow):
 
         self.img_width = 256                                # The width of the image representing the computer's choice
         self.img_height = 256                               # The height of the image representing the computer's choice
-        self.cv_img = None                                  # The image representing the computer's choice
+        self.cv_img = None                                  # The camera image of player 1
+        self.cv_img2 = None                                 # The camera image of player 2
         self.thread = None                                  # Image capturing thread
 
         # Set up the main window
@@ -82,7 +83,7 @@ class MainWindow(QMainWindow):
         self.bottom_text = QLabel()
         self.bottom_text.setText('')
         self.bottom_text.setAlignment(Qt.AlignCenter)
-        self.bottom_text.setStyleSheet('QLabel { font-size: 14px; }')
+        self.bottom_text.setStyleSheet('QLabel { font-size: 14px; margin-top: 10px; }')
 
         self.switch_difficulty('easy')                                              # Set the default difficulty
         self.switch_detection_method('neural network')                              # Set the default detection method
@@ -122,11 +123,11 @@ class MainWindow(QMainWindow):
         self.image_label2 = QLabel()
         self.image_label2.setAlignment(Qt.AlignCenter)
 
-        pixmap = QPixmap('sample_images/rock.jpg').scaled(self.img_width, self.img_height)
-        q_image = QPixmap.toImage(pixmap)
+        self.pixmap = QPixmap('sample_images/rock.jpg').scaled(self.img_width, self.img_height)
+        q_image = QPixmap.toImage(self.pixmap)
         grayscale = q_image.convertToFormat(QImage.Format_Grayscale8)
-        pixmap = QPixmap.fromImage(grayscale)
-        self.image_label2.setPixmap(pixmap)
+        self.pixmap = QPixmap.fromImage(grayscale)
+        self.image_label2.setPixmap(self.pixmap)
 
         camera_layout = QHBoxLayout()
         camera_layout.addWidget(self.image_label)
@@ -196,6 +197,7 @@ class MainWindow(QMainWindow):
         """Switch the difficulty of the game."""
         self.difficulty = difficulty
         self.highlight_button((self.sidebar_btn1, self.sidebar_btn2, self.sidebar_btn3, self.sidebar_btn4), difficulty)
+        self.thread.set_cropping_method('grab_side' if difficulty == '1v1' else 'grab_mid')
         self.set_capture_button_enabled_state()
         self.bottom_text.setText('')
 
@@ -224,11 +226,18 @@ class MainWindow(QMainWindow):
         """Display the recognized hand symbols as the bottom text."""
         self.bottom_text.setText(f'Player 1 chose {self.player1_choice.lower()}, Player 2 chose {self.player2_choice.lower()}')
 
-    def update_image(self, cv_img):
-        """Update camera image."""
+    def update_image(self, cv_img, cv_img2):
+        """Update the camera image(s)."""
         self.cv_img = cv_img
         qt_img = self.convert_cv_qt_gray(cv_img)
         self.image_label.setPixmap(qt_img)
+
+        if self.difficulty == '1v1':
+            self.cv_img2 = cv_img2
+            qt_img = self.convert_cv_qt_gray(cv_img2)
+            self.image_label2.setPixmap(qt_img)
+        else:
+            self.image_label2.setPixmap(self.pixmap)
 
     def convert_cv_qt_color(self, cv_img):
         """ Convert from a BGR opencv image to QPixmap. """

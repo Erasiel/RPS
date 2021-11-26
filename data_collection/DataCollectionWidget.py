@@ -7,13 +7,22 @@ from DataCollector import DataCollector
 
 
 class VideoThread(QThread):
-    change_pixmap_signal = pyqtSignal(np.ndarray)
+    change_pixmap_signal = pyqtSignal(np.ndarray, np.ndarray)
+    cropping_method = 'grab_mid'
 
     def grab_mid(self, cv_img, x, y):
         img_x, img_y, _ = cv_img.shape
         x_cutoff = (img_x - x) // 2
         y_cutoff = (img_y - y) // 2
         return cv_img[x_cutoff:x_cutoff + x, y_cutoff:y_cutoff+y, :]
+
+    def grab_sides(self, cv_img, x, y):
+        img_height, img_width, _ = cv_img.shape
+        x_cutoff = (img_width - 2*x) // 2
+        y_cutoff = (img_height - y) // 2
+        right_side = cv_img[y_cutoff:y_cutoff + y, x_cutoff + x:x_cutoff + 2*x, :]
+        left_side = cv_img[y_cutoff:y_cutoff+y, x_cutoff:x_cutoff+x, :]
+        return left_side, right_side
 
     def run(self):
         # Capture from webcam
@@ -25,8 +34,15 @@ class VideoThread(QThread):
         while True:
             ret, cv_img = cap.read()
             if ret:
-                mid_image = self.grab_mid(cv_img, 256, 256)
-                self.change_pixmap_signal.emit(mid_image)
+                if self.cropping_method == 'grab_mid':
+                    mid_image = self.grab_mid(cv_img, 256, 256)
+                    self.change_pixmap_signal.emit(mid_image, mid_image)
+                else:
+                    left_image, right_image = self.grab_sides(cv_img, 256, 256)
+                    self.change_pixmap_signal.emit(left_image, right_image)
+
+    def set_cropping_method(self, cropping_method='grab_mid'):
+        self.cropping_method = cropping_method
 
 
 class DataCollectionWidget(QtWidgets.QWidget):
