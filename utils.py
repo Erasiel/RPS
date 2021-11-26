@@ -12,7 +12,7 @@ class MainWindow(QMainWindow):
     """This class represents the main window of the application."""
 
     def __init__(self):
-        # Call parent class' constructor
+        # Call the parent class' constructor
         super().__init__()
 
         # Set some member variables
@@ -25,12 +25,12 @@ class MainWindow(QMainWindow):
         self.player1_choice = ''                            # Choice of player 1
         self.player2_choice = ''                            # Choice of player 2
 
-        self.img_width = 256                               # The width of the image representing the computer's choice
-        self.img_height = 256                              # The height of the image representing the computer's choice
-        self.cv_img = None                                 # The image representing the computer's choice
-        self.thread = None                                 # Image capturing thread
+        self.img_width = 256                                # The width of the image representing the computer's choice
+        self.img_height = 256                               # The height of the image representing the computer's choice
+        self.cv_img = None                                  # The image representing the computer's choice
+        self.thread = None                                  # Image capturing thread
 
-        # Set up main window
+        # Set up the main window
 
         self.setWindowTitle(self.window_title)
         self.setFixedSize(self.window_width, self.window_height)
@@ -82,6 +82,7 @@ class MainWindow(QMainWindow):
         self.bottom_text = QLabel()
         self.bottom_text.setText('')
         self.bottom_text.setAlignment(Qt.AlignCenter)
+        self.bottom_text.setStyleSheet('QLabel { font-size: 14px; }')
 
         self.switch_difficulty('easy')                                              # Set the default difficulty
         self.switch_detection_method('neural network')                              # Set the default detection method
@@ -162,13 +163,17 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(self.main_widget)
 
     def neural_network(self):
-        """TODO"""
+        """Hand signal detection using neural network."""
         print('Poof! Doing some neural network magic...')
+        self.player1_choice = 'scissors'                        # TODO: replace with detected information...
+        self.player2_choice = 'rock'
         self.update_bottom_text()
 
     def media_pipe(self):
-        """TODO"""
+        """Hand signal detection using MediaPipe."""
         print('Poof! Doing some MediaPipe magic...')
+        self.player1_choice = 'scissors'                        # TODO: replace with detected information...
+        self.player2_choice = 'rock'
         self.update_bottom_text()
 
     def capture_player1_image(self):
@@ -177,9 +182,6 @@ class MainWindow(QMainWindow):
         if self.detection_method == 'mediapipe':
             self.media_pipe()
 
-        self.player1_choice = 'scissors'                    # TODO: replace with detected information...
-        self.player2_choice = 'rock'
-
         self.update_bottom_text()
 
     def capture_player2_image(self):
@@ -187,9 +189,6 @@ class MainWindow(QMainWindow):
             self.neural_network()
         if self.detection_method == 'mediapipe':
             self.media_pipe()
-
-        self.player1_choice = 'scissors'                   # TODO: replace with detected information...
-        self.player2_choice = 'rock'
 
         self.update_bottom_text()
 
@@ -203,7 +202,6 @@ class MainWindow(QMainWindow):
     def switch_detection_method(self, detection_method='neural network'):
         """Switch the detection method."""
         self.detection_method = detection_method
-        print(f'Detecting with {self.detection_method.lower()}...')
         self.highlight_button((self.neural_network_btn, self.media_pipe_btn), detection_method)
         self.bottom_text.setText('')
 
