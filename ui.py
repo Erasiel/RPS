@@ -1,13 +1,40 @@
 import sys
-sys.path.insert(1, 'data_collection')
-sys.path.insert(2, 'nn_hand_detection')
+sys.path.append('data_collection')
 
 import cv2
+import os
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from data_collection.DataCollectionWidget import VideoThread
-from nn_hand_detection import homemade_nn
+
+
+class ChangeDirectory:
+    """
+    A simple context manager util class that enters and exists a given directory. This will come in handy when
+    importing the Neural Network and MediaPipe files.
+    """
+    def __init__(self, path: str):
+        self.stored_path = os.getcwd()                  # Store the path of the current directory
+        self.path = path                                # Set the path of the directory to be entered
+
+    def __enter__(self):
+        if not os.path.exists(os.path.join(os.getcwd(), self.path)):
+            raise RuntimeError(f'The given directory does not exist: {self.path}')
+
+        os.chdir(self.path)
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        os.chdir(self.stored_path)
+
+
+with ChangeDirectory('nn_hand_detection'):
+    from nn_hand_detection import homemade_nn
+
+
+with ChangeDirectory('mediapipe_hand_detection'):
+    from mediapipe_hand_detection import mp_real_time
 
 
 class MainWindow(QMainWindow):
@@ -165,7 +192,6 @@ class MainWindow(QMainWindow):
     def neural_network(self):
         """Hand signal detection using neural network."""
         self.player1_choice = homemade_nn.predict(self.cv_img)
-
         if self.difficulty == '1v1':
             self.player2_choice = homemade_nn.predict(self.cv_img2)
         else:
@@ -175,7 +201,7 @@ class MainWindow(QMainWindow):
     def media_pipe(self):
         """Hand signal detection using MediaPipe."""
         print('Poof! Doing some MediaPipe magic...')
-        self.player1_choice = 'scissors'                        # TODO: replace with detected information...
+        self.player1_choice = 'scissors'                        # TODO: replace with real information
         self.player2_choice = 'rock'
         self.update_bottom_text()
 
