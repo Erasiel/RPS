@@ -34,7 +34,7 @@ with ChangeDirectory('nn_hand_detection'):
 
 
 with ChangeDirectory('mediapipe_hand_detection'):
-    from mediapipe_hand_detection import mp_real_time
+    from mediapipe_hand_detection import rps_utils
 
 
 class MainWindow(QMainWindow):
@@ -151,9 +151,6 @@ class MainWindow(QMainWindow):
         self.image_label2.setAlignment(Qt.AlignCenter)
 
         self.pixmap = QPixmap('sample_images/rock.jpg').scaled(self.img_width, self.img_height)
-        q_image = QPixmap.toImage(self.pixmap)
-        grayscale = q_image.convertToFormat(QImage.Format_Grayscale8)
-        self.pixmap = QPixmap.fromImage(grayscale)
         self.image_label2.setPixmap(self.pixmap)
 
         camera_layout = QHBoxLayout()
@@ -200,9 +197,12 @@ class MainWindow(QMainWindow):
 
     def media_pipe(self):
         """Hand signal detection using MediaPipe."""
-        print('Poof! Doing some MediaPipe magic...')
-        self.player1_choice = 'scissors'                        # TODO: replace with real information
-        self.player2_choice = 'rock'
+        with ChangeDirectory('mediapipe_hand_detection'):
+            self.player1_choice = rps_utils.detect_gesture(self.cv_img)
+            if self.difficulty == '1v1':
+                self.player2_choice = rps_utils.detect_gesture(self.cv_img2)
+            else:
+                self.player2_choice = 'rock'                    # TODO: replace with the computer's choice
         self.update_bottom_text()
 
     def capture_player1_image(self):
@@ -249,12 +249,12 @@ class MainWindow(QMainWindow):
     def update_image(self, cv_img, cv_img2):
         """Update the camera image(s)."""
         self.cv_img = cv_img
-        qt_img = self.convert_cv_qt_gray(cv_img)
+        qt_img = self.convert_cv_qt_color(cv_img)
         self.image_label.setPixmap(qt_img)
 
         if self.difficulty == '1v1':
             self.cv_img2 = cv_img2
-            qt_img = self.convert_cv_qt_gray(cv_img2)
+            qt_img = self.convert_cv_qt_color(cv_img2)
             self.image_label2.setPixmap(qt_img)
         else:
             self.image_label2.setPixmap(self.pixmap)
@@ -268,9 +268,15 @@ class MainWindow(QMainWindow):
         convert_to_qt_format = QImage(rgb_image.data, w, h, bytes_per_line, QImage.Format_RGB888)
         p = convert_to_qt_format.scaled(self.img_width, self.img_height, Qt.KeepAspectRatio)
 
-    def convert_cv_qt_gray(self, cv_img):
+        return QPixmap.fromImage(p)
+
+    def convert_cv_qt_gray(self, cv_img, opponent_image=False):
         """ Convert from a grayscale opencv image to QPixmap. """
-        self.cv_img = cv2.cvtColor(cv_img, cv2.COLOR_BGR2GRAY)
+        converted = cv2.cvtColor(cv_img, cv2.COLOR_BGR2GRAY)
+        if not opponent_image:
+            self.cv_img = converted
+        else:
+            self.cv_img2 = converted
         rgb_image = cv2.cvtColor(cv_img, cv2.COLOR_BGR2GRAY)
         h, w = rgb_image.shape
         bytes_per_line = w

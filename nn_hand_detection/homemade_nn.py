@@ -2,7 +2,7 @@ import cv2
 from keras import models
 import numpy as np
 
-model = models.load_model("rps_homemade_model.h5")
+model = models.load_model("rps_transfer_model.h5")
 
 PREDICTION_LABELS = {
     0: "paper",
