@@ -11,7 +11,7 @@ import rps_utils as rps
 # Constants
 # ------------------------------------------------------------------------------------------
 
-MODEL_PATH = "./model_1636465208.pkl"
+MODEL_PATH = "./model_1637688558.pkl"
 
 # ------------------------------------------------------------------------------------------
 # Main
@@ -32,6 +32,10 @@ if __name__ == '__main__':
 
         while capture.isOpened():
             success, image = capture.read()
+
+            # Test rps.detect_gesture function
+            predicted_label_function_test = rps.detect_gesture(image)
+            print(f"FUNCTION TEST: {predicted_label_function_test}")
 
             if not success:
                 print("Ignoring empty camera frame.")
@@ -59,7 +63,7 @@ if __name__ == '__main__':
                 landmark_dists = rps.landmark_distances(landmark_coords)
                 dist_features = np.array(landmark_dists).reshape(1, -1)
                 predicted_label = clf.predict(dist_features)[0]
-                print(f"PREDICTION: {rps.LABELS[predicted_label]}")
+                print(f"PREDICTION: {rps.LABELS[predicted_label]}\n")
 
                 # Draw the landmarks on the image
                 rps.MP_DRAW.draw_landmarks(

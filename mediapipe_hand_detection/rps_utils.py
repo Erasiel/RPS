@@ -3,6 +3,7 @@
 # ------------------------------------------------------------------------------------------
 
 import cv2
+import joblib
 import math
 import mediapipe as mp
 import numpy as np
@@ -10,13 +11,16 @@ import os
 import pathlib
 
 # ------------------------------------------------------------------------------------------
-# CONSTANTS
+# Constants
 # ------------------------------------------------------------------------------------------
 
 # Mediapipe utilities
 MP_HANDS = mp.solutions.hands
 MP_DRAW = mp.solutions.drawing_utils
 MP_DRAW_STYLES = mp.solutions.drawing_styles
+
+# Path of the trained model
+MODEL_PATH = "./model_1637688558.pkl"
 
 # Labels for rps gestures
 LABELS = {
@@ -29,6 +33,42 @@ LABELS = {
 # ------------------------------------------------------------------------------------------
 # Implementation
 # ------------------------------------------------------------------------------------------
+
+def detect_gesture(image):
+    """
+    Process the the image and determine the hand gesture with the help of the trained model.
+    Return the name of the gesture (if no hand is detected, return "None" as a string).
+    """
+    # Load trained model
+    clf = joblib.load(MODEL_PATH)
+
+    # Run mediapipe hand detection
+    with MP_HANDS.Hands(
+        max_num_hands=1,
+        min_detection_confidence=0.5,
+        min_tracking_confidence=0.5) as hands:
+
+        # Change color model
+        image = cv2.cvtColor(cv2.flip(image, 1), cv2.COLOR_BGR2RGB)
+
+        # Process image and get detection output
+        image.flags.writeable = False
+        results = hands.process(image)
+
+        # Get image properties
+        height, width, _ = image.shape
+
+        if results.multi_hand_landmarks is not None:
+            hand_landmarks = results.multi_hand_landmarks[0]
+
+            # Predict gesture
+            landmark_coords = get_landmark_coordinates(hand_landmarks, width, height)
+            landmark_dists = landmark_distances(landmark_coords)
+            dist_features = np.array(landmark_dists).reshape(1, -1)
+            predicted_label = clf.predict(dist_features)[0]
+            return LABELS[predicted_label]
+
+        return "None"
 
 def process_images(dir_path, label):
     """
@@ -50,7 +90,7 @@ def process_images(dir_path, label):
 def process_image(file_path):
     """
     Run hand detection on the given image and create an annotated image and return a vector
-    with the distance values. Return none if no hand is detected.
+    with the distance values. Return None if no hand is detected.
     """
     with MP_HANDS.Hands(
         static_image_mode=True,
