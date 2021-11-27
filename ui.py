@@ -1,11 +1,13 @@
 import sys
 sys.path.insert(1, 'data_collection')
+sys.path.insert(2, 'nn_hand_detection')
 
 import cv2
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from data_collection.DataCollectionWidget import VideoThread
+from nn_hand_detection import homemade_nn
 
 
 class MainWindow(QMainWindow):
@@ -74,9 +76,7 @@ class MainWindow(QMainWindow):
         # Create the "Capture" buttons for the two players
 
         self.capture_btn1 = QPushButton('Capture')
-        self.capture_btn2 = QPushButton('Capture')
         self.capture_btn1.clicked.connect(lambda: self.capture_player1_image())
-        self.capture_btn2.clicked.connect(lambda: self.capture_player2_image())
 
         # Create the QLabel text element for displaying the result of the game
 
@@ -137,7 +137,6 @@ class MainWindow(QMainWindow):
 
         capture_btn_layout = QHBoxLayout()
         capture_btn_layout.addWidget(self.capture_btn1)
-        capture_btn_layout.addWidget(self.capture_btn2)
 
         # Set up the text label for the result of the game
 
@@ -165,9 +164,12 @@ class MainWindow(QMainWindow):
 
     def neural_network(self):
         """Hand signal detection using neural network."""
-        print('Poof! Doing some neural network magic...')
-        self.player1_choice = 'scissors'                        # TODO: replace with detected information...
-        self.player2_choice = 'rock'
+        self.player1_choice = homemade_nn.predict(self.cv_img)
+
+        if self.difficulty == '1v1':
+            self.player2_choice = homemade_nn.predict(self.cv_img2)
+        else:
+            self.player2_choice = 'rock'                        # TODO: replace with the computer's choice
         self.update_bottom_text()
 
     def media_pipe(self):
@@ -198,7 +200,6 @@ class MainWindow(QMainWindow):
         self.difficulty = difficulty
         self.highlight_button((self.sidebar_btn1, self.sidebar_btn2, self.sidebar_btn3, self.sidebar_btn4), difficulty)
         self.thread.set_cropping_method('grab_side' if difficulty == '1v1' else 'grab_mid')
-        self.set_capture_button_enabled_state()
         self.bottom_text.setText('')
 
     def switch_detection_method(self, detection_method='neural network'):
@@ -214,13 +215,6 @@ class MainWindow(QMainWindow):
                 btn.setStyleSheet('QPushButton { background-color: #000; color: #fff; }')
             else:
                 btn.setStyleSheet('QPushButton { background-color: lightgray; color: initial; }')
-
-    def set_capture_button_enabled_state(self):
-        """The opponent's capture button will only be enabled in the 1v1 game mode."""
-        if self.difficulty == '1v1':
-            self.capture_btn2.setEnabled(True)
-        else:
-            self.capture_btn2.setEnabled(False)
 
     def update_bottom_text(self):
         """Display the recognized hand symbols as the bottom text."""
