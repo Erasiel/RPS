@@ -1,4 +1,9 @@
+from ai_player.utils import get_random_move, get_winning_move
+
 def get_hard_action(enemy_action: str):
-    # TODO: always return the winning action (see: utils.get_winning_action)
-    # TODO: handle "none" as enemy action
-    pass
+    winning_move = get_winning_move(enemy_action)
+
+    if winning_move:
+        return winning_move
+
+    return get_random_move()

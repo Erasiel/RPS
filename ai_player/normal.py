@@ -35,7 +35,7 @@ def update_player1_chances(enemy_move: str) -> str:
 
         print(f"Last 2 picks: {last_two_picks}")
         last_two_pick_chances[last_two_picks][enemy_move] += 1
-    
+
     pre_last_pick = last_pick
     last_pick = enemy_move
     last_two_picks = f"{pre_last_pick}-{last_pick}"
@@ -44,13 +44,13 @@ def update_player1_chances(enemy_move: str) -> str:
 
 def get_normal_action(enemy_move: str) -> str:
     """Returns the action of the normal difficulty AI player
-    
+
     Normal difficulty AI player always acts based on the last two actions the
     human player took and tries to best the human player by its knowledge of 
     the human's picking pattern. This function updates the chances according 
     to the human player's pick, but does not take their current action into
     consideration.
-    
+
     Returns:
         String with the AI player's pick.
     """
@@ -65,7 +65,7 @@ def get_normal_action(enemy_move: str) -> str:
     # Get AI player's move
     if pre_last_pick is None or last_pick is None:
         ai_player_pick = 'rock' # TODO: random
-    
+
     else:
         last_two_picks = f"{pre_last_pick}-{last_pick}"
         chances = last_two_pick_chances[last_two_picks]
@@ -81,6 +81,3 @@ def get_normal_action(enemy_move: str) -> str:
     print(ai_player_pick)
 
     return ai_player_pick
-
-
-
