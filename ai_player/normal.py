@@ -1,6 +1,6 @@
 from copy import deepcopy
 
-from ai_player.utils import get_winning_move
+from ai_player.utils import get_winning_move, get_random_move
 
 
 default_chances = {
@@ -25,10 +25,14 @@ last_pick = None
 pre_last_pick = None
 
 
-def update_player1_chances(enemy_move: str) -> str:
+def update_player1_chances(enemy_move: str) -> None:
     global last_two_pick_chances
     global last_pick
     global pre_last_pick
+
+    print(f"Enemy move is {enemy_move}")
+    if enemy_move == "none":
+        return
 
     if last_pick is not None and pre_last_pick is not None:
         last_two_picks = f"{pre_last_pick}-{last_pick}"
@@ -59,7 +63,9 @@ def get_normal_action(enemy_move: str) -> str:
     global last_pick
     global pre_last_pick
 
-    # TODO: handle none as enemy action
+    if enemy_move == "none":
+        return get_random_move()
+
     ai_player_pick = ''
 
     # Get AI player's move

@@ -24,10 +24,10 @@ MODEL_PATH = "./model_1637688558.pkl"
 
 # Labels for rps gestures
 LABELS = {
-    0: "Rock",
-    1: "Paper",
-    2: "Scissors",
-    3: "None"
+    0: "rock",
+    1: "paper",
+    2: "scissors",
+    3: "none"
 }
 
 # ------------------------------------------------------------------------------------------
@@ -68,7 +68,7 @@ def detect_gesture(image):
             predicted_label = clf.predict(dist_features)[0]
             return LABELS[predicted_label]
 
-        return "None"
+        return "none"
 
 def process_images(dir_path, label):
     """

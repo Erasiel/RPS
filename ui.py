@@ -66,7 +66,9 @@ class MainWindow(QMainWindow):
         self.cv_img2 = None                                 # The camera image of player 2
         self.thread = None                                  # Image capturing thread
 
-        self.ai_action = get_easy_action                               # AI action function
+        self.ai_action = get_easy_action                    # AI action function
+
+        self.sample_image_folder = "./sample_images"
 
         # Set up the main window
 
@@ -227,6 +229,7 @@ class MainWindow(QMainWindow):
                 if self.difficulty != 'normal':
                     update_player1_chances(self.player1_choice) # Collect player patterns if not normal mode
                     self.player2_choice = self.ai_action(self.player1_choice)
+                    print(self.player2_choice)
                 else:
                     self.player2_choice = get_normal_action(self.player1_choice)
             self.update_ai_image()
@@ -251,7 +254,6 @@ class MainWindow(QMainWindow):
 
     def switch_difficulty(self, difficulty='easy'):
         """Switch the difficulty of the game."""
-        # TODO: switch self.ai_action according to difficulty
         self.difficulty = difficulty
         if difficulty == 'easy':
             self.ai_action = get_easy_action
@@ -263,12 +265,20 @@ class MainWindow(QMainWindow):
         self.highlight_button((self.sidebar_btn1, self.sidebar_btn2, self.sidebar_btn3, self.sidebar_btn4), difficulty)
         self.thread.set_cropping_method('grab_side' if difficulty == '1v1' else 'grab_mid')
         self.bottom_text.setText('')
+        self.winner_text.setText('')
 
     def switch_detection_method(self, detection_method='neural network'):
         """Switch the detection method."""
         self.detection_method = detection_method
         self.highlight_button((self.neural_network_btn, self.media_pipe_btn), detection_method)
         self.bottom_text.setText('')
+        self.winner_text.setText('')
+
+        if detection_method == 'neural network':
+            self.sample_image_folder = "./sample_images"
+        else:
+            self.sample_image_folder = "../sample_images"
+
 
     def highlight_button(self, btn_tuple, btn_text):
         """Highlight a button with a given text from a tuple of buttons."""
@@ -297,8 +307,7 @@ class MainWindow(QMainWindow):
             self.image_label2.setPixmap(self.pixmap)
 
     def update_ai_image(self):
-        image_file = f'{self.player2_choice}.jpg'
-        image_filepath = f'sample_images/{image_file}'
+        image_filepath = f'{self.sample_image_folder}/{self.player2_choice}.jpg'
         self.pixmap = QPixmap(image_filepath).scaled(self.img_width, self.img_height)
         self.image_label2.setPixmap(self.pixmap)
 
