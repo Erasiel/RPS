@@ -1,4 +1,6 @@
 import sys
+
+from ai_player.easy import get_easy_action
 sys.path.append('data_collection')
 
 import cv2
@@ -7,6 +9,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from data_collection.DataCollectionWidget import VideoThread
+from ai_player.normal import get_normal_action, update_player1_chances
 
 
 class ChangeDirectory:
@@ -59,6 +62,8 @@ class MainWindow(QMainWindow):
         self.cv_img = None                                  # The camera image of player 1
         self.cv_img2 = None                                 # The camera image of player 2
         self.thread = None                                  # Image capturing thread
+
+        self.ai_action = get_easy_action                               # AI action function
 
         # Set up the main window
 
@@ -192,7 +197,11 @@ class MainWindow(QMainWindow):
         if self.difficulty == '1v1':
             self.player2_choice = homemade_nn.predict(self.cv_img2)
         else:
-            self.player2_choice = 'rock'                        # TODO: replace with the computer's choice
+            if self.difficulty != 'normal':
+                update_player1_chances(self.player1_choice) # Collect player patterns if not in normal mode
+                self.player2_choice = 'rock' # TODO: update, use self.get_ai_action()
+            else:
+                self.player2_choice = get_normal_action(self.player1_choice)
         self.update_bottom_text()
 
     def media_pipe(self):
@@ -202,7 +211,11 @@ class MainWindow(QMainWindow):
             if self.difficulty == '1v1':
                 self.player2_choice = rps_utils.detect_gesture(self.cv_img2)
             else:
-                self.player2_choice = 'rock'                    # TODO: replace with the computer's choice
+                if self.difficulty != 'normal':
+                    update_player1_chances(self.player1_choice) # Collect player patterns if not normal mode
+                    self.player2_choice = 'rock' # TODO: update, use self.get_ai_action()
+                else:
+                    self.player2_choice = get_normal_action(self.player1_choice)
         self.update_bottom_text()
 
     def capture_player1_image(self):
@@ -223,6 +236,7 @@ class MainWindow(QMainWindow):
 
     def switch_difficulty(self, difficulty='easy'):
         """Switch the difficulty of the game."""
+        # TODO: switch self.ai_action according to difficulty
         self.difficulty = difficulty
         self.highlight_button((self.sidebar_btn1, self.sidebar_btn2, self.sidebar_btn3, self.sidebar_btn4), difficulty)
         self.thread.set_cropping_method('grab_side' if difficulty == '1v1' else 'grab_mid')
