@@ -15,6 +15,11 @@ A program indításához szükséges függőségek (verziószám, ahol fontos):
 Eszköz követelmények:
 - Webkamera (min. 256x256 pixeles felbontással)
 
+**Amennyiben a webkamera nem USB-s** (beépített webkamera esetén) a `data_collection/DataCollectionWidget.py` 32. sorában lévő sort kell módosítani a következőre:
+```python
+cap = cv2.VideoCapture(0)
+``` 
+
 A program indítása: `python App.py`
 
 ## Működés
@@ -26,6 +31,8 @@ Amikor a játékos(ok) kézállása végleges, a szoftver kezelője kattintson a
 Játékmódok váltására a bal oldali gombokkal van lehetőség. A játékos három különbüző nehézségű egyjátékos mód és a többjátékos mód közül választhat. A fekete színnel megjelenő gomb jelzi az aktív nehézséget.
 
 A kézállások detektálásának módszerét is lehet változtatni a felső két gombbal, ahol szintén a fekete színnel megjelenő gomb jelzi az aktív detektálási módszert.
+
+A program működését bemutató rövid videó: https://youtu.be/5qZuU7YMEGQ
 
 ### Választható játékmódok
 

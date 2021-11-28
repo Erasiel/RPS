@@ -30,20 +30,17 @@ def update_player1_chances(enemy_move: str) -> None:
     global last_pick
     global pre_last_pick
 
-    print(f"Enemy move is {enemy_move}")
     if enemy_move == "none":
         return
 
     if last_pick is not None and pre_last_pick is not None:
         last_two_picks = f"{pre_last_pick}-{last_pick}"
 
-        print(f"Last 2 picks: {last_two_picks}")
         last_two_pick_chances[last_two_picks][enemy_move] += 1
 
     pre_last_pick = last_pick
     last_pick = enemy_move
     last_two_picks = f"{pre_last_pick}-{last_pick}"
-    print(f"Updated last two picks: {last_two_picks}")
 
 
 def get_normal_action(enemy_move: str) -> str:
@@ -84,6 +81,5 @@ def get_normal_action(enemy_move: str) -> str:
         ai_player_pick = get_winning_move(human_player_pick)
 
     update_player1_chances(enemy_move)
-    print(ai_player_pick)
 
     return ai_player_pick

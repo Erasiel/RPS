@@ -229,7 +229,6 @@ class MainWindow(QMainWindow):
                 if self.difficulty != 'normal':
                     update_player1_chances(self.player1_choice) # Collect player patterns if not normal mode
                     self.player2_choice = self.ai_action(self.player1_choice)
-                    print(self.player2_choice)
                 else:
                     self.player2_choice = get_normal_action(self.player1_choice)
             self.update_ai_image()

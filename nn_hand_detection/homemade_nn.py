@@ -25,7 +25,6 @@ def predict(image) -> str:
 
     pred = model.predict(np.array([image]))
 
-    # print(pred)
     return PREDICTION_LABELS[np.argmax(pred[0])]
 
 
