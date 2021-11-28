@@ -1,6 +1,7 @@
 import sys
 
 from ai_player.easy import get_easy_action
+from ai_player.utils import get_winner
 sys.path.append('data_collection')
 
 import cv2
@@ -10,6 +11,8 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from data_collection.DataCollectionWidget import VideoThread
 from ai_player.normal import get_normal_action, update_player1_chances
+from ai_player.easy import get_easy_action
+from ai_player.hard import get_hard_action
 
 
 class ChangeDirectory:
@@ -51,7 +54,7 @@ class MainWindow(QMainWindow):
 
         self.window_title = 'Rock, Paper, Scissors'         # The title of the application window
         self.window_width = 600                             # The width of the application window (in pixels)
-        self.window_height = 300                            # The height of the application window (in pixels)
+        self.window_height = 350                            # The height of the application window (in pixels)
         self.difficulty = ''                                # The selected difficulty
         self.detection_method = ''                          # The method used for detecting the hand signs
         self.player1_choice = ''                            # Choice of player 1
@@ -117,6 +120,13 @@ class MainWindow(QMainWindow):
         self.bottom_text.setAlignment(Qt.AlignCenter)
         self.bottom_text.setStyleSheet('QLabel { font-size: 14px; margin-top: 10px; }')
 
+        # Create the QLabel text element for displaying the winner of the game
+
+        self.winner_text = QLabel()
+        self.winner_text.setText('')
+        self.winner_text.setAlignment(Qt.AlignCenter)
+        self.winner_text.setStyleSheet('QLabel { font-size: 14px; margin-top: 10px; }')
+
         self.switch_difficulty('easy')                                              # Set the default difficulty
         self.switch_detection_method('neural network')                              # Set the default detection method
 
@@ -169,8 +179,9 @@ class MainWindow(QMainWindow):
 
         # Set up the text label for the result of the game
 
-        bottom_text_layout = QHBoxLayout()
+        bottom_text_layout = QVBoxLayout()
         bottom_text_layout.addWidget(self.bottom_text)
+        bottom_text_layout.addWidget(self.winner_text)
 
         # Add the constructed layouts to the right widget
 
@@ -199,9 +210,11 @@ class MainWindow(QMainWindow):
         else:
             if self.difficulty != 'normal':
                 update_player1_chances(self.player1_choice) # Collect player patterns if not in normal mode
-                self.player2_choice = 'rock' # TODO: update, use self.get_ai_action()
+                self.player2_choice = self.ai_action(self.player1_choice)
             else:
                 self.player2_choice = get_normal_action(self.player1_choice)
+            self.update_ai_image()
+
         self.update_bottom_text()
 
     def media_pipe(self):
@@ -213,9 +226,11 @@ class MainWindow(QMainWindow):
             else:
                 if self.difficulty != 'normal':
                     update_player1_chances(self.player1_choice) # Collect player patterns if not normal mode
-                    self.player2_choice = 'rock' # TODO: update, use self.get_ai_action()
+                    self.player2_choice = self.ai_action(self.player1_choice)
                 else:
                     self.player2_choice = get_normal_action(self.player1_choice)
+            self.update_ai_image()
+            
         self.update_bottom_text()
 
     def capture_player1_image(self):
@@ -238,6 +253,13 @@ class MainWindow(QMainWindow):
         """Switch the difficulty of the game."""
         # TODO: switch self.ai_action according to difficulty
         self.difficulty = difficulty
+        if difficulty == 'easy':
+            self.ai_action = get_easy_action
+        elif difficulty == 'normal':
+            self.ai_action = get_normal_action
+        elif difficulty == 'hard':
+            self.ai_action = get_hard_action
+
         self.highlight_button((self.sidebar_btn1, self.sidebar_btn2, self.sidebar_btn3, self.sidebar_btn4), difficulty)
         self.thread.set_cropping_method('grab_side' if difficulty == '1v1' else 'grab_mid')
         self.bottom_text.setText('')
@@ -259,6 +281,7 @@ class MainWindow(QMainWindow):
     def update_bottom_text(self):
         """Display the recognized hand symbols as the bottom text."""
         self.bottom_text.setText(f'Player 1 chose {self.player1_choice.lower()}, Player 2 chose {self.player2_choice.lower()}')
+        self.winner_text.setText(get_winner(self.player1_choice, self.player2_choice))
 
     def update_image(self, cv_img, cv_img2):
         """Update the camera image(s)."""
@@ -272,6 +295,12 @@ class MainWindow(QMainWindow):
             self.image_label2.setPixmap(qt_img)
         else:
             self.image_label2.setPixmap(self.pixmap)
+
+    def update_ai_image(self):
+        image_file = f'{self.player2_choice}.jpg'
+        image_filepath = f'sample_images/{image_file}'
+        self.pixmap = QPixmap(image_filepath).scaled(self.img_width, self.img_height)
+        self.image_label2.setPixmap(self.pixmap)
 
     def convert_cv_qt_color(self, cv_img):
         """ Convert from a BGR opencv image to QPixmap. """

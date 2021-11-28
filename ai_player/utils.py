@@ -22,7 +22,7 @@ def get_winner(player1_move, player2_move):
     if player1_move == player2_move:
         return "Draw, try harder next time"
 
-    if get_winning_move(player1_move) == player2_move:
+    if get_winning_move(player1_move) != player2_move:
         return "Player 1 wins!"
     else:
         return "Player 2 wins!"
